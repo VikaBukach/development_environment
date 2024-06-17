@@ -1,0 +1,51 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: docker/
+      dockerfile: nginx.docker
+    platform: linux/amd64
+    volumes:
+      - ./:/app
+      - ./var/logs/nginx:/var/log/nginx
+      - ./docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      - php-fpm
+    ports:
+      - "80:80"
+
+  php-fpm:
+    platform: linux/amd64
+    build:
+      context: docker/
+      dockerfile: php8.2-fpm.docker
+    volumes:
+      - ./:/app
+      - ./var/logs/php:/var/log
+    depends_on:
+      - mysql
+
+  mysql:
+    build:
+      context: docker/
+      dockerfile: mysql.docker
+    restart: always
+    platform: linux/amd64
+    command:
+      mysqld --character_set_server='utf8' --collation_server="utf8_unicode_ci" --slow_query_log=1 --slow_query_log_file=/var/log/mysql-slow-query.log --long_query_time=0.3
+    environment:
+      MYSQL_DATABASE: crm_for_tgBot
+      MYSQL_USER: crm_for_tgBot
+      MYSQL_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DEFAULT_AUTH: 'mysql_native_password'
+    ports:
+      - '33062:3306'
+    volumes:
+      - ./dump:/var/mysql/dump
+      - ./var/mysql:/var/lib/mysql
+      - ./var/logs/mysql:/var/log
+
+volumes:
+  composer:
+  webroot-share:
