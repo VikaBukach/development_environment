@@ -25,6 +25,17 @@ services:
     depends_on:
       - mysql
 
+  php-cli:
+    platform: linux/amd64
+    build:
+      context: docker/
+      dockerfile: php8.2-cli.docker
+    volumes:
+      - ./:/app
+      - ./var/logs/php:/var/log
+    depends_on:
+      - mysql
+
   mysql:
     build:
       context: docker/
